@@ -1,0 +1,8 @@
+author: brjannc
+database: false
+description: ^_^
+generator: http://dinnerbone.com/minecraft/tools/pluginator/
+main: me.brjannc.plugins.sushi.SuSHi
+name: SuSHi
+startup: postworld
+version: '1.0-SNAPSHOT'
