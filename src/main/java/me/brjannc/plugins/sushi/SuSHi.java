@@ -16,60 +16,62 @@
 package me.brjannc.plugins.sushi;
 
 import java.io.IOException;
-import java.util.EnumSet;
 import java.util.logging.Logger;
 import org.apache.sshd.SshServer;
+import org.apache.sshd.server.Command;
+import org.apache.sshd.server.CommandFactory;
+import org.apache.sshd.server.command.ScpCommandFactory;
 import org.apache.sshd.server.keyprovider.SimpleGeneratorHostKeyProvider;
 import org.apache.sshd.server.shell.ProcessShellFactory;
-import org.apache.sshd.server.shell.ProcessShellFactory.TtyOptions;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class SuSHi extends JavaPlugin {
 
     private static final Logger log = Logger.getLogger("Minecraft");
+    private FileConfiguration config;
     private SshServer sshd;
-    private boolean running;
 
     public SuSHi() {
         sshd = SshServer.setUpDefaultServer();
-        
-        sshd.setPort(12822);
-        sshd.setKeyPairProvider(new SimpleGeneratorHostKeyProvider("hostkey.ser"));
-        sshd.setShellFactory(new ProcessShellFactory(new String[] { "/bin/sh", "-i", "-l" }, EnumSet.of(TtyOptions.Echo)));
-        sshd.setPasswordAuthenticator(new SuSHiAuthenticator());
-        
-        running = false;
+        sshd.setCommandFactory(new ScpCommandFactory(new CommandFactory() {
+
+            public Command createCommand(String command) {
+                return new ProcessShellFactory(command.split(" ")).create();
+            }
+        }));
     }
-    
+
     @Override
     public void onEnable() {
-        
-        if (running) {
-            return;
-        }
-        
+        config = getConfig();
+
+        String host = config.getString("host");
+        int port = config.getInt("port");
+
+        sshd.setHost(host);
+        sshd.setPort(port);
+        sshd.setKeyPairProvider(new SimpleGeneratorHostKeyProvider(getDataFolder() + "/hostkey.ser"));
+        sshd.setPasswordAuthenticator(new SuSHiAuthenticator());
+
         try {
             sshd.start();
-            running = true;
-            log.info(this + " is now enabled");
+            log.info(this + " is now enabled, bound to " + host + ":" + port);
         } catch (IOException e) {
-            logEvent("Caught exception: " + e.getMessage());
+            logEvent("Caught exception: " + e);
         }
     }
 
     @Override
     public void onDisable() {
-        if (!running) {
-            return;
-        }
-        
+        saveConfig();
+
         try {
             sshd.stop();
-            running = false;
             log.info(this + " is now disabled");
         } catch (InterruptedException e) {
-            logEvent("Caught exception: " + e.getMessage());
+            logEvent("Caught exception: " + e);
         }
     }
 
