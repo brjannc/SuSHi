@@ -23,14 +23,14 @@ import org.apache.sshd.server.CommandFactory;
 import org.apache.sshd.server.command.ScpCommandFactory;
 import org.apache.sshd.server.keyprovider.SimpleGeneratorHostKeyProvider;
 import org.apache.sshd.server.shell.ProcessShellFactory;
-import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.Configuration;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class SuSHi extends JavaPlugin {
 
-    private static final Logger log = Logger.getLogger("Minecraft");
-    private FileConfiguration config;
+    private static final Logger log = Logger.getLogger("Minecraft.SuSHi");
+    private SuSHiAuthenticator authenticator;
     private SshServer sshd;
 
     public SuSHi() {
@@ -45,7 +45,10 @@ public class SuSHi extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        config = getConfig();
+        Configuration config = getConfig();
+        if (config.getKeys(true).isEmpty()) {
+            config.options().copyDefaults(true);
+        }
 
         String host = config.getString("host");
         int port = config.getInt("port");
@@ -53,7 +56,7 @@ public class SuSHi extends JavaPlugin {
         sshd.setHost(host);
         sshd.setPort(port);
         sshd.setKeyPairProvider(new SimpleGeneratorHostKeyProvider(getDataFolder() + "/hostkey.ser"));
-        sshd.setPasswordAuthenticator(new SuSHiAuthenticator());
+        sshd.setPublickeyAuthenticator(new SuSHiAuthenticator(getDataFolder() + "/authorized_keys"));
 
         try {
             sshd.start();

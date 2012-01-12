@@ -16,12 +16,37 @@
  */
 package me.brjannc.plugins.sushi;
 
-import org.apache.sshd.server.PasswordAuthenticator;
+import java.io.File;
+import java.security.PublicKey;
+import java.util.HashSet;
+import java.util.Scanner;
+import java.util.Set;
+import org.apache.sshd.server.PublickeyAuthenticator;
 import org.apache.sshd.server.session.ServerSession;
 
-public class SuSHiAuthenticator implements PasswordAuthenticator {
+public class SuSHiAuthenticator implements PublickeyAuthenticator {
 
-    public boolean authenticate(String username, String password, ServerSession session) {
-        return true;
+    private Set<PublicKey> authorizedKeys;
+
+    public SuSHiAuthenticator(String authorizedKeysFilename) {
+        this.authorizedKeys = new HashSet<PublicKey>();
+
+        try {
+            Scanner scanner = new Scanner(new File(authorizedKeysFilename)).useDelimiter("\n");
+            AuthorizedKeysDecoder decoder = new AuthorizedKeysDecoder();
+
+            while (scanner.hasNext()) {
+                authorizedKeys.add(decoder.decodePublicKey(scanner.next()));
+                System.out.println(decoder.decodePublicKey(scanner.next()));
+            }
+
+            scanner.close();
+        } catch (Exception e) {
+            System.out.println("Caught an exception: " + e);
+        }
+    }
+
+    public boolean authenticate(String username, PublicKey key, ServerSession session) {
+        return authorizedKeys.contains(key);
     }
 }
