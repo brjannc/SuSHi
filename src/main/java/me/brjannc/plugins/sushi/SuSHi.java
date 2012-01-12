@@ -30,7 +30,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 public class SuSHi extends JavaPlugin {
 
     private static final Logger log = Logger.getLogger("Minecraft.SuSHi");
-    private SuSHiAuthenticator authenticator;
     private SshServer sshd;
 
     public SuSHi() {

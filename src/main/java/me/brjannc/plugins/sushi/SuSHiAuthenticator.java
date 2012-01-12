@@ -37,7 +37,6 @@ public class SuSHiAuthenticator implements PublickeyAuthenticator {
 
             while (scanner.hasNext()) {
                 authorizedKeys.add(decoder.decodePublicKey(scanner.next()));
-                System.out.println(decoder.decodePublicKey(scanner.next()));
             }
 
             scanner.close();
