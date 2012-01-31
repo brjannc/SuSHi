@@ -11,8 +11,12 @@ Configuration
 
 There are only two configuration keys in config.yml:
 
-host     The interface to bind to, 0.0.0.0 by default.
-port     The port to bind to, 12822 by default.
+*   *host*
+
+    The interface to bind to, 0.0.0.0 by default.
+*   *port*
+
+    The port to bind to, 12822 by default.
 
 
 Security
@@ -33,14 +37,14 @@ Usage
 For reasons I don't yet understand, the SSH shell channel doesn't work properly,
 so
 
-$ ssh -p 12822 minecraft.example.com
+`$ ssh -p 12822 minecraft.example.com`
 
 will just fail. The workaround is to specify a shell (preferably /bin/sh) as
 the command to be executed:
 
-$ ssh -p 12822 minecraft.example.com /bin/sh -i -l
+`$ ssh -p 12822 minecraft.example.com /bin/sh -i -l`
 
-(The -i -l flags specify that it should be a login shell, and that it should be
+(The `-i -l` flags specify that it should be a login shell, and that it should be
 interactive.)
 
 
